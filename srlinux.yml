@@ -1,0 +1,42 @@
+name: muzolab
+
+topology:
+  kinds:
+    srl:
+      image: ghcr.io/nokia/srlinux
+    linux:
+      image: ghcr.io/hellt/network-multitool
+      
+  nodes:
+  
+    leaf1:
+      kind: srl
+      type: ixrd3
+    
+    leaf2:
+      kind: srl
+      type: ixrd3
+    
+    client1:
+      kind: linux
+      image: alpine
+      exec:
+        - ip link add link eth1 name eth1
+        - ip addr add 10.0.0.25/31 dev eth1
+        - ip link set eth1 up
+        - ip r add 10.0.0.27/32 via 10.0.0.24
+
+    client2:
+      kind: linux
+      image: alpine
+      exec:
+        - ip link add link eth1 name eth1
+        - ip addr add 10.0.0.27/31 dev eth1
+        - ip link set eth1 up
+        - ip r add 10.0.0.25/32 via 10.0.0.26
+
+  links:
+
+    - endpoints: ["leaf1:e1-1", "leaf2:e1-1"]
+    - endpoints: ["leaf1:e1-2", "client1:eth1"]
+    - endpoints: ["leaf2:e1-2", "client2:eth1"]
